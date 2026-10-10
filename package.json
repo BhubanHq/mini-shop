@@ -1,0 +1,27 @@
+{
+  "name": "minishop",
+  "version": "1.0.0",
+  "description": "A basic CRUD backend project",
+  "keywords": [
+    "backend",
+    "api"
+  ],
+  "license": "ISC",
+  "author": "Bhuban",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prettier": "3.9.9"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "mongoose": "^9.11.1"
+  }
+}
