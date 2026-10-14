@@ -1,5 +1,6 @@
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
+import mongoose from "mongoose";
 const productValidator = (req, res, next) => {
     const { name, description, price, stock, category, isActive } = req.body;
 
@@ -21,13 +22,13 @@ const productValidator = (req, res, next) => {
             .json({ message: "Description must be a string" });
     }
 
-    if (!Number.isFinite(price) || price < 0) {
+    if (!Number.isInteger(price) || price < 0) {
         return res.status(400).json({
             message: "Price must be a number greater than or equal to 0",
         });
     }
 
-    if (!Number.isFinite(stock) || stock < 0) {
+    if (!Number.isInteger(stock) || stock < 0) {
         return res.status(400).json({
             message: "Stock must be a number greater than or equal to 0",
         });
@@ -43,10 +44,8 @@ const productValidator = (req, res, next) => {
 const getProductByIdValidator = (req, res, next) => {
     const { id } = req.params;
 
-    if (!id || typeof id !== "string" || id.trim().length === 0) {
-        return res.status(400).json({
-            message: "Product ID is required and must be a non-empty string",
-        });
+    if (!mongoose.isValidObjectId(id)) {
+        return next(new ApiError(400, "Invalid product ID"));
     }
 
     next();

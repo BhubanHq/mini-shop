@@ -25,7 +25,7 @@ const getProducts = AsyncHandler(async (req, res) => {
 });
 
 const getProductById = AsyncHandler(async (req, res) => {
-    console.log("Routee params :", req.params);
+    //   console.log("Routee params :", req.params);
     const product = await getProductByIdService(req.params.id);
 
     res.status(200).json(
@@ -34,9 +34,9 @@ const getProductById = AsyncHandler(async (req, res) => {
 });
 
 const updateProduct = AsyncHandler(async (req, res) => {
-    // console.log("Update Controller Reached");
-    // console.log("Routee params :", req.params);
-    // console.log("Request Body :", req.body);
+    //    console.log("Update Controller Reached");
+    //    console.log("Routee params :", req.params);
+    //    console.log("Request Body :", req.body);
     const product = await updateProductService(req.params.id, req.body);
 
     res.status(200).json(

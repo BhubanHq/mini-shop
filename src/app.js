@@ -21,13 +21,15 @@ app.use(
 //import the routes
 import healthCheckRouter from "./routes/healthcheck.routes.js";
 import productRouter from "./routes/product.routes.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
+import { notFoundMiddleware } from "./middlewares/notfound.middleware.js";
 
 //use the routes
 app.use("/api/v1", productRouter);
 app.use("/api/v1", healthCheckRouter);
 
 //middleware for error handling
-import { errorMiddleware } from "./middlewares/error.middleware.js";
+app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 export default app;

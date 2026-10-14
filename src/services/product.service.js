@@ -100,7 +100,10 @@ const deleteProductService = async (productId) => {
         throw new ApiError(404, "Product not found");
     }
 
-    await Product.findByIdAndDelete(productId);
+    product.isActive = false;
+    product.updatedAt = new Date();
+
+    await product.save();
 
     return product.toObject();
 };
