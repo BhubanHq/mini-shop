@@ -1,7 +1,6 @@
 export const UserRolesEnum = {
     ADMIN: "admin",
-    PROJECT_ADMIN: "project_admin",
-    USER: "user",
+    CUSTOMER: "customer",
 };
 
 export const UserRoles = Object.values(UserRolesEnum);
