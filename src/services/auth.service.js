@@ -35,10 +35,10 @@ const registerUserService = async function (req) {
     });
 
     // Generate email verification token and URL
-    const { unHashedToken, HashedToken, tokenExpiry } =
+    const { unHashedToken, hashedToken, tokenExpiry } =
         user.generateTemporaryToken();
 
-    user.emailVerificationToken = HashedToken;
+    user.emailVerificationToken = hashedToken;
     user.emailVerificationTokenExpiry = tokenExpiry;
     await user.save({ validateBeforeSave: false });
 
@@ -61,4 +61,49 @@ const registerUserService = async function (req) {
     return createdUser.toObject();
 };
 
-export { registerUserService };
+const loginUserService = async function (req) {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new ApiError(401, "Invalid Email or Password");
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
+        throw new ApiError(401, "Password is incorrect");
+    }
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+        user._id,
+    );
+
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshToken -emailVerificationToken -emailVerificationTokenExpiry -forgotPasswordToken -forgotPasswordTokenExpiry",
+    );
+
+    if (!loggedInUser) {
+        throw new ApiError(500, "Failed to retrieve logged in user");
+    }
+
+    return {
+        loggedInUser,
+        accessToken,
+        refreshToken,
+    };
+};
+
+const logoutUserService = async function (req) {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken: null,
+            },
+        },
+        {
+            new: true,
+        },
+    );
+};
+
+export { registerUserService, loginUserService, logoutUserService };
