@@ -9,13 +9,14 @@ import {
 
 import {
     productValidator,
+    productQueryValidator,
     getProductByIdValidator,
     productUpdateValidator,
 } from "../validators/product.validator.js";
 
 const router = Router();
 
-router.get("/products", getProducts);
+router.get("/products", productQueryValidator, getProducts);
 router.post("/products", productValidator, createProduct);
 router.get("/products/:id", getProductByIdValidator, getProductById);
 router.patch(

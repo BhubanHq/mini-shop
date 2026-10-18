@@ -1,6 +1,5 @@
 import User from "../models/user.model.js";
 import { ApiError } from "../utils/api-error.js";
-import { ApiResponse } from "../utils/api-response.js";
 import {
     sendMail,
     emailVerificationMailGenContent,
@@ -188,6 +187,78 @@ const refreshAccessTokenService = async function (req) {
     }
 };
 
+const forgotPasswordService = async function (req) {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new ApiError(404, "User with this email does not exist");
+    }
+
+    // Generate forgot password token and URL
+    const { unHashedToken, hashedToken, tokenExpiry } =
+        user.generateTemporaryToken();
+
+    user.forgotPasswordToken = hashedToken;
+    user.forgotPasswordTokenExpiry = tokenExpiry;
+    await user.save({ validateBeforeSave: false });
+
+    await sendMail({
+        email: user.email,
+        subject: "Forgot Password",
+        mailgenContent: forgotPasswordMailGenContent(
+            user.name,
+            `${process.env.FORGOT_PASSWORD_REDIRECT_URL}/${unHashedToken}`,
+        ),
+    });
+};
+
+const resetPasswordService = async function (token, newPassword) {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+        forgotPasswordToken: hashedToken,
+        forgotPasswordTokenExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+        throw new ApiError(400, "Invalid or expired forgot password token");
+    }
+
+    user.password = newPassword;
+    user.forgotPasswordToken = undefined;
+    user.forgotPasswordTokenExpiry = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return {
+        message: "Password has been reset successfully",
+    };
+};
+
+const changePasswordService = async function (
+    userId,
+    currentPassword,
+    newPassword,
+) {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const isMatch = await user.isPasswordCorrect(currentPassword);
+    if (!isMatch) {
+        throw new ApiError(400, "Current password is incorrect");
+    }
+
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return {
+        message: "Password has been changed successfully",
+    };
+};
+
 export {
     registerUserService,
     loginUserService,
@@ -195,4 +266,7 @@ export {
     verifyEmailService,
     resendEmailVerificationService,
     refreshAccessTokenService,
+    forgotPasswordService,
+    resetPasswordService,
+    changePasswordService,
 };

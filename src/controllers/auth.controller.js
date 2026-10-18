@@ -7,6 +7,9 @@ import {
     verifyEmailService,
     resendEmailVerificationService,
     refreshAccessTokenService,
+    forgotPasswordService,
+    resetPasswordService,
+    changePasswordService,
 } from "../services/auth.service.js";
 
 const registerUser = AsyncHandler(async (req, res) => {
@@ -95,6 +98,37 @@ const refreshAccessToken = AsyncHandler(async (req, res) => {
         );
 });
 
+const forgotPassword = AsyncHandler(async (req, res) => {
+    const result = await forgotPasswordService(req);
+
+    res.status(200).json(
+        new ApiResponse(200, result, "Password reset link has been sent"),
+    );
+});
+
+const resetPassword = AsyncHandler(async (req, res) => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const result = await resetPasswordService(token, newPassword);
+
+    res.status(200).json(
+        new ApiResponse(200, result, "Password has been reset successfully"),
+    );
+});
+
+const changePassword = AsyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const result = await changePasswordService(
+        req.user._id,
+        currentPassword,
+        newPassword,
+    );
+    res.status(200).json(
+        new ApiResponse(200, result, "Password changed successfully"),
+    );
+});
+
 export {
     registerUser,
     loginUser,
@@ -103,4 +137,7 @@ export {
     verifyEmail,
     refreshAccessToken,
     resendEmailVerification,
+    forgotPassword,
+    resetPassword,
+    changePassword,
 };

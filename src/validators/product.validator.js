@@ -1,7 +1,9 @@
 import { ApiError } from "../utils/api-error.js";
-import { ApiResponse } from "../utils/api-response.js";
 import mongoose from "mongoose";
 const productValidator = (req, res, next) => {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        return next(new ApiError(400, "Request body must be a valid object"));
+    }
     const { name, description, price, stock, category, isActive } = req.body;
 
     if (
@@ -109,7 +111,7 @@ const productUpdateValidator = (req, res, next) => {
     }
 
     if ("price" in body) {
-        if (!Number.isFinite(body.price) || body.price < 0) {
+        if (!Number.isInteger(body.price) || body.price < 0) {
             return next(
                 new ApiError(
                     400,
@@ -120,7 +122,7 @@ const productUpdateValidator = (req, res, next) => {
     }
 
     if ("stock" in body) {
-        if (!Number.isFinite(body.stock) || body.stock < 0) {
+        if (!Number.isInteger(body.stock) || body.stock < 0) {
             return next(
                 new ApiError(
                     400,
@@ -152,3 +154,12 @@ const productUpdateValidator = (req, res, next) => {
 };
 
 export { productValidator, getProductByIdValidator, productUpdateValidator };
+
+export const productQueryValidator = (req, res, next) => {
+    for (const field of ["search", "category"]) {
+        if (req.query[field] !== undefined && typeof req.query[field] !== "string") {
+            return next(new ApiError(400, `${field} must be a string`));
+        }
+    }
+    return next();
+};
