@@ -3,7 +3,7 @@
 # MiniShop — E-Commerce REST API
 
 **Version:** 1.0  
-**Project Type:** Backend-only learning project  
+**Project Type:** Backend-only
 **Estimated Duration:** 14–21 days  
 **Status:** Planned
 
